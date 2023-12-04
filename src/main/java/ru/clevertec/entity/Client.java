@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -17,7 +16,7 @@ public class Client {
     private final List<Integer> listData = new ArrayList<>();
     public static Long accumulator = 0L;
 
-    ExecutorService executor = Executors.newSingleThreadExecutor();
+    ExecutorService executor = Executors.newCachedThreadPool(); // .newFixedThreadPool(2);
 
     public Client(int n) {
         IntStream.rangeClosed(1, n)
@@ -29,20 +28,16 @@ public class Client {
         return listData.remove(index);
     }
 
-    public void remove(int size) {
-        IntStream.rangeClosed(1, size)
-                .forEach((i) -> {
-                    Integer value = getValue();
-                    log.info("Отправка запроса от клиента со значением " + value);
-                    try {
-                        TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (501 - 100) + 100));
-                        Future<Integer> response = executor.submit(new Server(value));
-                        accumulator += response.get();
-                        print();
-                    } catch (InterruptedException | ExecutionException e) {
-                        System.err.println("Exception!!!!: " + e);
-                    }
-                });
+    public void requestOfClient() {
+        Integer value = getValue();
+        log.info("Отправка запроса от клиента со значением " + value);
+        try {
+            Future<Integer> response = executor.submit(new Server(value));
+            accumulator += response.get();
+            print();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Exception!!!!: " + e);
+        }
     }
 
     public void print() {
@@ -54,16 +49,4 @@ public class Client {
         executor.shutdown();
         return accumulator;
     }
-
-//    @Override
-//    public void run() {
-//        int value = (int) (Math.random() * (listData.size()));
-//        Future<Integer> response = remove(value);
-//        try {
-//            accumulator += response.get();
-//            print();
-//        } catch (InterruptedException | ExecutionException e) {
-//            System.err.println("Exception!!!!: " + e);
-//        }
-//    }
 }
