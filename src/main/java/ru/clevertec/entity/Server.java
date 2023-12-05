@@ -24,25 +24,24 @@ public class Server implements Callable<Integer> {
         boolean locked = false;
 
         try {
-            locked = lock.tryLock(2000, TimeUnit.MILLISECONDS);
+            locked = lock.tryLock(5000, TimeUnit.MILLISECONDS);
             if (locked) {
                 TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (1001 - 100) + 100));
                 log.info("Запущена обработка запроса сервером. Значение " + value);
-                if (!listRequest.contains(value)) {
-                    listRequest.add(value);
-                    return listRequest.size();
-                }
             }
         } finally {
             if (locked) {
+                if (!listRequest.contains(value)) {
+                    listRequest.add(value);
+                }
                 lock.unlock();
                 log.info("Обработка сервером запроса со значением=" + value + " окончена");
             }
         }
-        return 0;
+        return listRequest.size();
     }
 
-    public int getListRequestSize() {
+    public static int getListRequestSize() {
         return listRequest.size();
     }
 }

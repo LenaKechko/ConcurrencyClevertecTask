@@ -29,13 +29,13 @@ public class Client {
         return listData.remove(index);
     }
 
-    public Runnable getRequest(Integer value) {
+    private Runnable getRequest(Integer value) {
         return () -> {
             log.info("Отправка запроса от клиента со значением " + value);
             try {
                 TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (501 - 100) + 100));
             } catch (InterruptedException e) {
-                log.error("Exception!!!!: " + e);
+                log.error("Not a lot time for wait: " + e);
             }
         };
     }
@@ -51,9 +51,9 @@ public class Client {
                         ).toList();
         for (Future<Integer> response : responses) {
             try {
-                accumulator += response.get();
+                addToAccumulator(response.get());
             } catch (InterruptedException | ExecutionException e) {
-                System.err.println("Exception!!!!: " + e);
+                System.err.println("Response is nothing: " + e);
             }
         }
         if (!executor.isTerminated()) {
@@ -63,6 +63,10 @@ public class Client {
 
     public int getListDataSize() {
         return listData.size();
+    }
+
+    public void addToAccumulator(Integer value) {
+        accumulator += value;
     }
 
     public Long getAccumulator() {
