@@ -12,7 +12,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         int size = sc.nextInt();
         Client client = new Client(size);
-        client.requestOfClient();
+        Process.requestOfClient(client);
         log.info("Total accumulator = " + client.getAccumulator());
     }
 }
