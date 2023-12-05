@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class Server implements Callable<Integer> {
-    private Integer value = 0;
+    private final Integer value;
     private static final List<Integer> listRequest = new ArrayList<>();
     private static final Lock lock = new ReentrantLock();
 
@@ -21,18 +21,28 @@ public class Server implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        log.info("Запущена обработка запроса сервером. Значение " + value);
-        lock.lock();
+        boolean locked = false;
+
         try {
-            TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (1001 - 100) + 100));
-            if (!listRequest.contains(value)) {
-                listRequest.add(value);
-                return listRequest.size();
+            locked = lock.tryLock(2000, TimeUnit.MILLISECONDS);
+            if (locked) {
+                TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (1001 - 100) + 100));
+                log.info("Запущена обработка запроса сервером. Значение " + value);
+                if (!listRequest.contains(value)) {
+                    listRequest.add(value);
+                    return listRequest.size();
+                }
             }
         } finally {
-            lock.unlock();
-            log.info("Обработка сервером запроса со значением=" + value + " окончена");
+            if (locked) {
+                lock.unlock();
+                log.info("Обработка сервером запроса со значением=" + value + " окончена");
+            }
         }
         return 0;
+    }
+
+    public int getListRequestSize() {
+        return listRequest.size();
     }
 }

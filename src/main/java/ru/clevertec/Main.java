@@ -2,16 +2,6 @@ package ru.clevertec;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.entity.Client;
-import ru.clevertec.entity.Server;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
 
 @Slf4j
 public class Main {
@@ -24,16 +14,9 @@ public class Main {
 //        client.requestOfClient();
 //        client.remove(size);
 //        client.print();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        IntStream.rangeClosed(1, size)
-                .forEach((i) -> {
-                    client.requestOfClient();
-                    try {
-                        TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (501 - 100) + 100));
-                    } catch (InterruptedException e) {
-                        log.error("Exception!!!!: " + e);
-                    }
-                });
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+        client.requestOfClient();
+
 //        List<Future<Integer>> futures =
 //        IntStream.rangeClosed(1, size)
 //                .forEach((i) -> executor.submit(new Server(client.remove())));
@@ -56,7 +39,7 @@ public class Main {
 
 //        executor.shutdown();
 
-        System.out.println(client.stop());
+        System.out.println(client.getAccumulator());
 
 //        for (int i = 1; i < size; i++) {
 //            Callable<Integer> callable

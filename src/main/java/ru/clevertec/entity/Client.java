@@ -8,19 +8,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @Slf4j
 public class Client {
 
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
     private final List<Integer> listData = new ArrayList<>();
+    private final int countRequest;
     public static Long accumulator = 0L;
 
-    ExecutorService executor = Executors.newCachedThreadPool(); // .newFixedThreadPool(2);
-
     public Client(int n) {
-        IntStream.rangeClosed(1, n)
-                .forEach(this.listData::add);
+        this.countRequest = n;
+        IntStream.rangeClosed(1, n).forEach(this.listData::add);
     }
 
     public Integer getValue() {
@@ -28,25 +29,43 @@ public class Client {
         return listData.remove(index);
     }
 
+    public Runnable getRequest(Integer value) {
+        return () -> {
+            log.info("Отправка запроса от клиента со значением " + value);
+            try {
+                TimeUnit.MILLISECONDS.sleep((long) (Math.random() * (501 - 100) + 100));
+            } catch (InterruptedException e) {
+                log.error("Exception!!!!: " + e);
+            }
+        };
+    }
+
     public void requestOfClient() {
-        Integer value = getValue();
-        log.info("Отправка запроса от клиента со значением " + value);
-        try {
-            Future<Integer> response = executor.submit(new Server(value));
-            accumulator += response.get();
-            print();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Exception!!!!: " + e);
+        List<Future<Integer>> responses =
+                IntStream.rangeClosed(1, countRequest)
+                        .mapToObj((i) -> {
+                                    Integer value = this.getValue();
+                                    executor.execute(getRequest(value));
+                                    return executor.submit(new Server(value));
+                                }
+                        ).toList();
+        for (Future<Integer> response : responses) {
+            try {
+                accumulator += response.get();
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("Exception!!!!: " + e);
+            }
+        }
+        if (!executor.isTerminated()) {
+            executor.shutdown();
         }
     }
 
-    public void print() {
-        System.out.println(listData);
-        System.out.println(accumulator);
+    public int getListDataSize() {
+        return listData.size();
     }
 
-    public Long stop() {
-        executor.shutdown();
+    public Long getAccumulator() {
         return accumulator;
     }
 }
