@@ -9,15 +9,45 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Класс Сервер, который принимает запросы от Клиента,
+ * складывает в их в listResponse.
+ * В ответ на запрос Клиент получает текущий размер списка.
+ * Работа ведется в потоке
+ */
 @Slf4j
 public class Server implements Callable<Integer> {
+
+    /**
+     * Значение запроса от клиента
+     */
     private final Integer value;
-    private static final List<Integer> listRequest = new ArrayList<>();
+    /**
+     * Список ответов клиенту
+     */
+    private static final List<Integer> listResponse = new ArrayList<>();
+    /**
+     * Поле для блокировки обрабатываемых запросов
+     */
     private static final Lock lock = new ReentrantLock();
 
+    /**
+     * Конструктор
+     *
+     * @param value значение запроса от Клиента
+     */
     public Server(Integer value) {
         this.value = value;
     }
+
+    /**
+     * Метод запускающий работу потока.
+     * Запросы обрабатываются с задержкой от 100 до 1000 милисекунд.
+     * Сервер может обрабатывать только один запрос за раз,
+     * поэтому для разблокировки следующий запрос от Клиента ожидает 5 секунд.
+     *
+     * @return текущий размер списка ответов
+     */
 
     @Override
     public Integer call() throws Exception {
@@ -31,21 +61,29 @@ public class Server implements Callable<Integer> {
             }
         } finally {
             if (locked) {
-                if (!listRequest.contains(value)) {
-                    listRequest.add(value);
+                if (!listResponse.contains(value)) {
+                    listResponse.add(value);
                 }
                 lock.unlock();
                 log.info("Обработка сервером запроса со значением=" + value + " окончена");
             }
         }
-        return listRequest.size();
+        return listResponse.size();
     }
 
+    /**
+     * Статический метод вовращает размер списка ответов
+     *
+     * @return размер списка
+     */
     public static int getListRequestSize() {
-        return listRequest.size();
+        return listResponse.size();
     }
 
+    /**
+     * Статический метод для очистки списка ответов
+     */
     public static void cleanListRequest() {
-        listRequest.clear();
+        listResponse.clear();
     }
 }

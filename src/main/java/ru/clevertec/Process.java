@@ -11,9 +11,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+
+/**
+ * Класс отвечающий за работу и запуск многопоточности.
+ */
 @Slf4j
 public class Process {
 
+    /**
+     * В методе в пуле потоков происходит обработка запросов от Клиента к Серверу.
+     * Количество операций соответствует количеству запросов
+     *
+     * @param client объект Клиента
+     */
     public static void requestOfClient(Client client) {
         ExecutorService executor = Executors.newFixedThreadPool(5);
         Server.cleanListRequest();
