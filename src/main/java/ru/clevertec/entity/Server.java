@@ -44,4 +44,8 @@ public class Server implements Callable<Integer> {
     public static int getListRequestSize() {
         return listRequest.size();
     }
+
+    public static void cleanListRequest() {
+        listRequest.clear();
+    }
 }

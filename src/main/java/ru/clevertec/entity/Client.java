@@ -1,20 +1,25 @@
 package ru.clevertec.entity;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
 public class Client {
 
-     private final List<Integer> listData = new ArrayList<>();
-    public static Long accumulator = 0L;
+    private final List<Integer> listData;
+    @Getter
+    public Long accumulator = 0L;
 
     public Client(int n) {
-        IntStream.rangeClosed(1, n).forEach(this.listData::add);
+        this.listData = IntStream.rangeClosed(1, n)
+                .boxed()
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public Integer getValue() {
@@ -41,7 +46,4 @@ public class Client {
         accumulator += value;
     }
 
-    public Long getAccumulator() {
-        return accumulator;
-    }
 }

@@ -1,7 +1,5 @@
 package ru.clevertec.entity;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,14 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClientTest {
 
     private Client client;
-
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
 
     @RepeatedTest(5)
     void getValue() {

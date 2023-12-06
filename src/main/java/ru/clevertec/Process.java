@@ -1,5 +1,6 @@
 package ru.clevertec;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.entity.Client;
 import ru.clevertec.entity.Server;
 
@@ -10,13 +11,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+@Slf4j
 public class Process {
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(5);
-
     public static void requestOfClient(Client client) {
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        Server.cleanListRequest();
+        int countRequest = client.getListDataSize();
         List<Future<Integer>> responses =
-                IntStream.rangeClosed(1, client.getListDataSize())
+                IntStream.rangeClosed(1, countRequest)
                         .mapToObj((i) -> {
                                     Integer value = client.getValue();
                                     executor.execute(client.getRequest(value));
